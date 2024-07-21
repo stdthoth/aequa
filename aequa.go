@@ -3,8 +3,10 @@ package aequa
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -69,6 +71,27 @@ func (a *Aequa) Init(path initPaths) error {
 			return err
 		}
 	}
+	return nil
+}
+
+// BuildServer builds the server that will be used in Aequa's module.
+func (a *Aequa) BuildServer() error {
+	port := os.Getenv("PORT")
+	srv := &http.Server{
+		Addr:         fmt.Sprintf("%s:", port),
+		ErrorLog:     a.ErrorLog,
+		Handler:      a.routes(),
+		IdleTimeout:  30 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 100 * time.Second,
+	}
+
+	a.InfoLog.Printf("Listening on port %s", port)
+	err := srv.ListenAndServe()
+	if err != nil {
+		a.ErrorLog.Fatal(err)
+	}
+
 	return nil
 }
 
