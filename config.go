@@ -1,6 +1,6 @@
 package aequa
 
 type config struct {
-	port   string
-	render string
+	Port string
+	View string
 }

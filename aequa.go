@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"github.com/stdthoth/aequa/views"
 )
 
 const version = "1.0.0"
@@ -21,6 +23,8 @@ type Aequa struct {
 	Version  string
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
+	View     *views.View
+	Routes   *chi.Mux
 	RootPath string
 	config   config
 }
@@ -54,11 +58,13 @@ func (a *Aequa) New(rootPath string) error {
 	a.Debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
 	a.Version = version
 	a.RootPath = rootPath
+	a.Routes = a.routes().(*chi.Mux)
 
 	a.config = config{
-		port:   os.Getenv("PORT"),
-		render: os.Getenv("RENDERER"),
+		Port: os.Getenv("PORT"),
+		View: os.Getenv("VIEWER"),
 	}
+	a.View = a.createView(a)
 
 	return nil
 }
@@ -80,7 +86,7 @@ func (a *Aequa) BuildServer() error {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("%s:", port),
 		ErrorLog:     a.ErrorLog,
-		Handler:      a.routes(),
+		Handler:      a.Routes,
 		IdleTimeout:  30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 100 * time.Second,
@@ -113,4 +119,13 @@ func (a *Aequa) newLogger() (*log.Logger, *log.Logger) {
 	ErrorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	return InfoLog, ErrorLog
+}
+
+func (a *Aequa) createView(aeq *Aequa) *views.View {
+	view := views.View{
+		Viewer:   aeq.config.View,
+		RootPath: aeq.RootPath,
+		Port:     aeq.config.Port,
+	}
+	return &view
 }

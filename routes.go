@@ -9,7 +9,7 @@ import (
 
 func (a *Aequa) routes() http.Handler {
 	mux := chi.NewRouter()
-	mux.Use((middleware.RequestID)
+	mux.Use(middleware.RequestID)
 	mux.Use(middleware.RealIP)
 	if a.Debug {
 		mux.Use(middleware.Logger)
