@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CloudyKit/jet/v6"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/stdthoth/aequa/views"
@@ -24,6 +25,7 @@ type Aequa struct {
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 	View     *views.View
+	JetViews *jet.Set
 	Routes   *chi.Mux
 	RootPath string
 	config   config
@@ -64,7 +66,19 @@ func (a *Aequa) New(rootPath string) error {
 		Port: os.Getenv("PORT"),
 		View: os.Getenv("VIEWER"),
 	}
-	a.View = a.createView(a)
+
+	/*Render a Jet Template View*/
+	var jetViews = jet.NewSet(
+		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+		jet.InDevelopmentMode(),
+	)
+
+	a.JetViews = jetViews
+
+	err = a.createView()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -121,11 +135,16 @@ func (a *Aequa) newLogger() (*log.Logger, *log.Logger) {
 	return InfoLog, ErrorLog
 }
 
-func (a *Aequa) createView(aeq *Aequa) *views.View {
+/**/
+func (a *Aequa) createView() error {
 	view := views.View{
-		Viewer:   aeq.config.View,
-		RootPath: aeq.RootPath,
-		Port:     aeq.config.Port,
+		Viewer:   a.config.View,
+		JetViews: a.JetViews,
+		RootPath: a.RootPath,
+		Port:     a.config.Port,
 	}
-	return &view
+
+	a.View = &view
+
+	return nil
 }
