@@ -1,6 +1,7 @@
 package views
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -37,9 +38,11 @@ func (v *View) Page(w http.ResponseWriter, r *http.Request, view string, variabl
 		return v.GoTemplates(w, r, view, data)
 	case "jet":
 		return v.JetTemlates(w, r, view, variables, data)
+	default:
+
 	}
 
-	return nil
+	return errors.New("no rendering engine specified")
 }
 
 // GoTemplates renders standard go.html templates
