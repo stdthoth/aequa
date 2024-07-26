@@ -9,8 +9,10 @@ import (
 	"time"
 
 	"github.com/CloudyKit/jet/v6"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"github.com/stdthoth/aequa/session"
 	"github.com/stdthoth/aequa/views"
 )
 
@@ -26,6 +28,7 @@ type Aequa struct {
 	InfoLog  *log.Logger
 	View     *views.View
 	JetViews *jet.Set
+	Session  *scs.SessionManager
 	Routes   *chi.Mux
 	RootPath string
 	config   config
@@ -65,7 +68,22 @@ func (a *Aequa) New(rootPath string) error {
 	a.config = config{
 		Port: os.Getenv("PORT"),
 		View: os.Getenv("VIEWER"),
+		cookie: cookieConfig{
+			name:     os.Getenv("COOKIE_TYPE"),
+			persists: os.Getenv("COOKIE_PERSISTS"),
+			lifetime: os.Getenv("COOKIE_LIFETIME"),
+		},
+		sessionType: os.Getenv("SESSION_TYPE"),
 	}
+
+	session := session.Session{
+		Name:        a.config.cookie.name,
+		Lifetime:    a.config.cookie.lifetime,
+		Persists:    a.config.cookie.persists,
+		SessionType: a.config.sessionType,
+	}
+
+	a.Session = session.NewSession()
 
 	/*Render a Jet Template View*/
 	var jetViews = jet.NewSet(
