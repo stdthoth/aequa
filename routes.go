@@ -16,5 +16,7 @@ func (a *Aequa) routes() http.Handler {
 	}
 	mux.Use(middleware.Recoverer)
 
+	mux.Use(a.LoadAndSave)
+
 	return mux
 }

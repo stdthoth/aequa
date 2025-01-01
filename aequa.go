@@ -72,6 +72,7 @@ func (a *Aequa) New(rootPath string) error {
 			name:     os.Getenv("COOKIE_TYPE"),
 			persists: os.Getenv("COOKIE_PERSISTS"),
 			lifetime: os.Getenv("COOKIE_LIFETIME"),
+			domain:   os.Getenv("COOKIE_DOMAIN"),
 		},
 		sessionType: os.Getenv("SESSION_TYPE"),
 	}
@@ -80,6 +81,7 @@ func (a *Aequa) New(rootPath string) error {
 		Name:        a.config.cookie.name,
 		Lifetime:    a.config.cookie.lifetime,
 		Persists:    a.config.cookie.persists,
+		Domain:      a.config.cookie.domain,
 		SessionType: a.config.sessionType,
 	}
 
